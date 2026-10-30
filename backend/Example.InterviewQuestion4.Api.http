@@ -1,0 +1,4 @@
+﻿@ApiHost = http://localhost:5000
+
+GET {{ApiHost}}/api/health
+Accept: application/json

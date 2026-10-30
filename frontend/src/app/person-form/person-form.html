@@ -1,0 +1,226 @@
+<main class="person-page">
+  <h1>
+    {{ savedId() !== null ? 'IT 04-2' : 'IT 04-1' }}
+  </h1>
+  @if (savedId() !== null) {
+    <div class="success" role="status">save data success Id : {{ savedId() }}</div>
+  }
+  <form [formGroup]="form" (ngSubmit)="save()" novalidate>
+    <fieldset class="form-fields" [disabled]="saving()" [attr.aria-busy]="saving()">
+      <legend class="visually-hidden">Person details</legend>
+      <div class="form-grid">
+        <div class="field">
+          <label for="firstName"
+            >First Name <span class="required-indicator" aria-hidden="true">*</span></label
+          >
+          <input
+            id="firstName"
+            formControlName="firstName"
+            placeholder="Enter first name"
+            autocomplete="given-name"
+            maxlength="100"
+            required
+            [attr.aria-invalid]="!!message('firstName')"
+            aria-describedby="firstName-error"
+          />
+          <p id="firstName-error" class="field-error">
+            {{ message('firstName') }}
+          </p>
+        </div>
+        <div class="field">
+          <label for="lastName"
+            >Last Name <span class="required-indicator" aria-hidden="true">*</span></label
+          >
+          <input
+            id="lastName"
+            formControlName="lastName"
+            placeholder="Enter last name"
+            autocomplete="family-name"
+            maxlength="100"
+            required
+            [attr.aria-invalid]="!!message('lastName')"
+            aria-describedby="lastName-error"
+          />
+          <p id="lastName-error" class="field-error">
+            {{ message('lastName') }}
+          </p>
+        </div>
+        <div class="field">
+          <label for="email"
+            >Email <span class="required-indicator" aria-hidden="true">*</span></label
+          >
+          <input
+            id="email"
+            type="email"
+            formControlName="email"
+            placeholder="example@email.com"
+            autocomplete="email"
+            maxlength="254"
+            required
+            [attr.aria-invalid]="!!message('email')"
+            aria-describedby="email-error"
+          />
+          <p id="email-error" class="field-error">
+            {{ message('email') }}
+          </p>
+        </div>
+        <div class="field">
+          <label for="phone"
+            >Phone <span class="required-indicator" aria-hidden="true">*</span></label
+          >
+          <input
+            id="phone"
+            type="tel"
+            formControlName="phone"
+            placeholder="0XXXXXXXXX"
+            autocomplete="tel-national"
+            maxlength="10"
+            required
+            [attr.aria-invalid]="!!message('phone')"
+            aria-describedby="phone-error"
+          />
+          <p id="phone-error" class="field-error">
+            {{ message('phone') }}
+          </p>
+        </div>
+        <div class="field">
+          <label for="profile"
+            >Profile <span class="required-indicator" aria-hidden="true">*</span></label
+          >
+          <div class="file-picker" [attr.data-invalid]="!!message('profile')">
+            <span id="profile-selection" [class.is-placeholder]="!profile()" class="file-name">{{
+              profile()?.fileName ?? 'Choose profile image'
+            }}</span>
+            <span class="browse">Browse</span>
+            <input
+              #fileInput
+              id="profile"
+              type="file"
+              accept=".jpg,.jpeg,.png,image/jpeg,image/png"
+              (change)="selectProfile($event)"
+              required
+              [attr.aria-invalid]="!!message('profile')"
+              aria-describedby="profile-selection profile-error profile-hint"
+            />
+          </div>
+          <p id="profile-error" class="field-error">
+            {{ message('profile') }}
+            <span id="profile-hint" class="hint" [hidden]="!!message('profile')"
+              >JPG/PNG · up to 2 MB · up to 16 megapixels</span
+            >
+          </p>
+          @if (readingImage()) {
+            <p class="hint" role="status">Reading profile image…</p>
+          }
+          @if (profile(); as image) {
+            <img class="preview" [src]="image.preview" alt="Selected profile preview" />
+          }
+        </div>
+        <div class="field">
+          <label for="birthDate"
+            >Birth Day <span class="required-indicator" aria-hidden="true">*</span></label
+          >
+          <div class="date-picker">
+            <input
+              id="birthDate"
+              formControlName="birthDate"
+              placeholder="DD/MM/YYYY"
+              (click)="openDatePicker(birthDatePicker)"
+              (keydown.alt.arrowdown)="openDatePicker(birthDatePicker); $event.preventDefault()"
+              maxlength="10"
+              required
+              [attr.aria-invalid]="!!message('birthDate')"
+              aria-describedby="birthDate-error birthDate-hint"
+            />
+            <button
+              class="calendar-icon"
+              type="button"
+              aria-label="Choose Birth Day"
+              (click)="openDatePicker(birthDatePicker)"
+            >
+              ▦
+            </button>
+            <input
+              #birthDatePicker
+              class="calendar-input"
+              type="date"
+              tabindex="-1"
+              aria-hidden="true"
+              [max]="today"
+              [value]="toApiBirthDate(form.controls.birthDate.value) ?? ''"
+              (change)="selectDate($event)"
+            />
+          </div>
+          <p id="birthDate-error" class="field-error">
+            {{ message('birthDate') }}
+            <span id="birthDate-hint" class="hint" [hidden]="!!message('birthDate')"
+              >DD/MM/YYYY · Gregorian calendar</span
+            >
+          </p>
+        </div>
+        <div class="field occupation">
+          <label for="occupation"
+            >Occupation <span class="required-indicator" aria-hidden="true">*</span></label
+          >
+          <div class="select-wrapper">
+            <select
+              [attr.data-empty]="!form.controls.occupation.value"
+              id="occupation"
+              formControlName="occupation"
+              required
+              [attr.aria-invalid]="!!message('occupation')"
+              aria-describedby="occupation-error"
+            >
+              <option value="" disabled>Select occupation</option>
+              @for (occupation of occupations; track occupation) {
+                <option [value]="occupation">{{ occupation }}</option>
+              }</select
+            ><span class="select-arrow" aria-hidden="true"></span>
+          </div>
+          <p id="occupation-error" class="field-error">
+            {{ message('occupation') }}
+          </p>
+        </div>
+        <fieldset class="sex-field">
+          <legend>Sex <span class="required-indicator" aria-hidden="true">*</span></legend>
+          <div class="radio-options">
+            <label
+              ><input
+                type="radio"
+                formControlName="sex"
+                value="Male"
+                required
+                [attr.aria-invalid]="!!message('sex')"
+                aria-describedby="sex-error"
+              />
+              Male</label
+            >
+            <label
+              ><input
+                type="radio"
+                formControlName="sex"
+                value="Female"
+                required
+                [attr.aria-invalid]="!!message('sex')"
+                aria-describedby="sex-error"
+              />
+              Female</label
+            >
+          </div>
+          <p id="sex-error" class="field-error">
+            {{ message('sex') }}
+          </p>
+        </fieldset>
+      </div>
+    </fieldset>
+    @if (errorMessage()) {
+      <p class="save-error" role="alert">{{ errorMessage() }}</p>
+    }
+    <div class="actions">
+      <button class="save" type="submit" [disabled]="saving() || readingImage()">
+        {{ saving() ? 'Saving…' : 'Save' }}
+      </button>
+      <button class="clear" type="button" (click)="clear()" [disabled]="saving()">Clear</button>
+    </div>
+  </form>
+</main>
